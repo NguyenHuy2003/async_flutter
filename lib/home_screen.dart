@@ -113,19 +113,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: const TextStyle(
                             fontSize: 16.0, fontWeight: FontWeight.bold),
                       ),
-                      trailing: IconButton(
-                        icon: Icon(
-                            isSaved ? Icons.bookmark : Icons.bookmark_outline),
-                        onPressed: () {
-                          setState(() {
-                            if (isSaved) {
-                              _savedArticles.remove(_articles[index]);
-                            } else {
-                              _savedArticles.add(_articles[index]);
-                            }
-                          });
-                        },
-                      ),
                     ),
                   ),
                 );
@@ -133,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToSavedArticles,
-        child: const Icon(Icons.bookmark),
+        child: const Icon(Icons.favorite),
       ),
     );
   }
