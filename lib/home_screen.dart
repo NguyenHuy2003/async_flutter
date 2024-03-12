@@ -69,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            Row(
+            const Row(
               children: [
                 Text(
                   'Explore',
