@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
+import 'saved_articles_screen.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -15,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<Article> _articles = [];
+  List<Article> _savedArticles = []; // Danh sách các bài viết đã lưu
 
   @override
   void initState() {
@@ -42,6 +45,16 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _navigateToSavedArticles() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            SavedArticlesScreen(savedArticles: _savedArticles),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            const Row(
+            Row(
               children: [
                 Text(
                   'Explore',
@@ -72,6 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
           : ListView.builder(
               itemCount: _articles.length,
               itemBuilder: (context, index) {
+                final isSaved = _savedArticles.contains(_articles[index]);
                 return GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -91,7 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           _articles[index].urlToImage,
                           width: 100.0,
                           height: 100.0,
-                          fit: BoxFit.cover, // Adjust as needed
+                          fit: BoxFit.cover,
                         ),
                       ),
                       title: Text(
@@ -99,11 +113,28 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: const TextStyle(
                             fontSize: 16.0, fontWeight: FontWeight.bold),
                       ),
+                      trailing: IconButton(
+                        icon: Icon(
+                            isSaved ? Icons.bookmark : Icons.bookmark_outline),
+                        onPressed: () {
+                          setState(() {
+                            if (isSaved) {
+                              _savedArticles.remove(_articles[index]);
+                            } else {
+                              _savedArticles.add(_articles[index]);
+                            }
+                          });
+                        },
+                      ),
                     ),
                   ),
                 );
               },
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _navigateToSavedArticles,
+        child: const Icon(Icons.bookmark),
+      ),
     );
   }
 }

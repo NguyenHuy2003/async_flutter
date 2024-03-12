@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:localstore/localstore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'saved_articles_screen.dart';
+
 class DetailPage extends StatefulWidget {
   final Article news;
 
-  const DetailPage({super.key, required this.news});
+  const DetailPage({Key? key, required this.news}) : super(key: key);
 
   @override
   State<DetailPage> createState() => _DetailPageState();
@@ -14,6 +16,7 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage> {
   bool isLiked = false;
+  List<Article> _savedArticles = []; // Danh sách các bài viết đã thích
 
   @override
   void initState() {
@@ -46,11 +49,23 @@ class _DetailPageState extends State<DetailPage> {
           updatedIsLiked ? 'Bài viết đã được lưu' : 'Bài viết đã được xóa'),
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    // Gọi hàm lưu bài viết đã thích hoặc xóa bài viết đã thích từ Localstore
-    if (isLiked) {
+
+    // Cập nhật danh sách bài viết đã lưu
+    if (updatedIsLiked) {
+      setState(() {
+        _savedArticles.add(widget.news);
+      });
+    } else {
+      setState(() {
+        _savedArticles.remove(widget.news);
+      });
+    }
+
+    // Gọi hàm lưu bài viết đã thích hoặc xóa bài viết đã thích
+    if (updatedIsLiked) {
       await saveArticles([widget.news]);
     } else {
-      await deleteArticle([widget.news]);
+      await deleteArticle(widget.news);
     }
   }
 
@@ -60,16 +75,13 @@ class _DetailPageState extends State<DetailPage> {
       appBar: AppBar(
         title: const Text(
           'Details',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(
-              isLiked ? Icons.favorite : Icons.favorite_border_rounded,
-            ),
+            icon:
+                Icon(isLiked ? Icons.favorite : Icons.favorite_border_rounded),
             onPressed: _toggleLike,
           ),
         ],
@@ -90,9 +102,7 @@ class _DetailPageState extends State<DetailPage> {
               child: Text(
                 widget.news.title,
                 style: const TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                ),
+                    fontSize: 16.0, fontWeight: FontWeight.bold),
               ),
             ),
             Padding(
@@ -104,6 +114,18 @@ class _DetailPageState extends State<DetailPage> {
             )
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  SavedArticlesScreen(savedArticles: _savedArticles),
+            ),
+          );
+        },
+        child: Icon(Icons.bookmark),
       ),
     );
   }
@@ -131,7 +153,18 @@ Future<void> saveArticles(List<Article> articles) async {
   await db.collection('users').doc('likedArticles').set(savedArticlesMap);
 }
 
-Future deleteArticle(List<Article> articles) async {
+Future<void> deleteArticle(Article article) async {
   final db = Localstore.instance;
-  return db.collection('users').doc('likedArticles').delete();
+  final likedArticles = await db.collection('users').doc('likedArticles').get();
+
+  if (likedArticles != null) {
+    final Map<String, dynamic>? savedArticles =
+        // ignore: unnecessary_cast
+        likedArticles as Map<String, dynamic>?;
+
+    if (savedArticles != null && savedArticles.containsKey(article.title)) {
+      savedArticles.remove(article.title);
+      await db.collection('users').doc('likedArticles').set(savedArticles);
+    }
+  }
 }
