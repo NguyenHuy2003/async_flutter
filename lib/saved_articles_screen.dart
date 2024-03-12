@@ -83,6 +83,12 @@ class _SavedArticlesScreenState extends State<SavedArticlesScreen> {
                 );
               },
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/home');
+        },
+        child: const Icon(Icons.home),
+      ),
     );
   }
 }
