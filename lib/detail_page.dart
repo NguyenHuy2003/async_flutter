@@ -84,6 +84,12 @@ class _DetailPageState extends State<DetailPage> {
                 Icon(isLiked ? Icons.favorite : Icons.favorite_border_rounded),
             onPressed: _toggleLike,
           ),
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/home');
+            },
+            icon: const Icon(Icons.home),
+          ),
         ],
       ),
       body: SingleChildScrollView(
