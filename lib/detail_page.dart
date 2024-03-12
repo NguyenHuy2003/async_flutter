@@ -125,7 +125,7 @@ class _DetailPageState extends State<DetailPage> {
             ),
           );
         },
-        child: Icon(Icons.bookmark),
+        child: const Icon(Icons.favorite),
       ),
     );
   }
