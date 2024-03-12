@@ -1,13 +1,44 @@
+import 'package:async_flutter/article_model.dart'; // Assuming Article model import
 import 'package:flutter/material.dart';
+import 'package:localstore/localstore.dart';
 
-import 'article_model.dart';
 import 'detail_page.dart';
 
-class SavedArticlesScreen extends StatelessWidget {
-  final List<Article> savedArticles;
-
-  const SavedArticlesScreen({Key? key, required this.savedArticles})
+class SavedArticlesScreen extends StatefulWidget {
+  const SavedArticlesScreen({Key? key, required List<Article> savedArticles})
       : super(key: key);
+
+  @override
+  _SavedArticlesScreenState createState() => _SavedArticlesScreenState();
+}
+
+class _SavedArticlesScreenState extends State<SavedArticlesScreen> {
+  List<Article> _savedArticles = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadArticles();
+  }
+
+  Future<void> _loadArticles() async {
+    final db = Localstore.instance;
+    final likedArticles =
+        await db.collection('users').doc('likedArticles').get();
+
+    if (likedArticles != null) {
+      final Map<String, dynamic>? savedArticles =
+          likedArticles as Map<String, dynamic>?;
+
+      if (savedArticles != null) {
+        setState(() {
+          _savedArticles = savedArticles.values
+              .map((article) => Article.fromMap(article))
+              .toList();
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,10 +46,10 @@ class SavedArticlesScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Save'),
       ),
-      body: savedArticles.isEmpty
-          ? const Center(child: Text('Chưa có bài báo nào được lưu!'))
+      body: _savedArticles.isEmpty
+          ? const Center(child: Text('Chưa có bài báo nào được lưu'))
           : ListView.builder(
-              itemCount: savedArticles.length,
+              itemCount: _savedArticles.length,
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
@@ -26,7 +57,7 @@ class SavedArticlesScreen extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                            DetailPage(news: savedArticles[index]),
+                            DetailPage(news: _savedArticles[index]),
                       ),
                     );
                   },
@@ -36,14 +67,14 @@ class SavedArticlesScreen extends StatelessWidget {
                       leading: ClipRRect(
                         borderRadius: BorderRadius.circular(10.0),
                         child: Image.network(
-                          savedArticles[index].urlToImage,
+                          _savedArticles[index].urlToImage,
                           width: 100.0,
                           height: 100.0,
                           fit: BoxFit.cover,
                         ),
                       ),
                       title: Text(
-                        savedArticles[index].title,
+                        _savedArticles[index].title,
                         style: const TextStyle(
                             fontSize: 16.0, fontWeight: FontWeight.bold),
                       ),
