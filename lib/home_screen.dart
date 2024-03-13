@@ -85,7 +85,6 @@ class _HomeScreenState extends State<HomeScreen> {
           : ListView.builder(
               itemCount: _articles.length,
               itemBuilder: (context, index) {
-                final isSaved = _savedArticles.contains(_articles[index]);
                 return GestureDetector(
                   onTap: () {
                     Navigator.push(
