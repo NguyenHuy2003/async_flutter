@@ -85,9 +85,6 @@ class _DetailPageState extends State<DetailPage> {
     } catch (e) {
       // ignore: avoid_print
       print('Error loading article content: $e');
-      setState(() {
-        articleContent = 'Lỗi khi tải nội dung bài viết!';
-      });
     }
   }
 
@@ -127,7 +124,7 @@ class _DetailPageState extends State<DetailPage> {
           ),
           IconButton(
             onPressed: () {
-              Navigator.pushNamed(context, '/home');
+              Navigator.pushReplacementNamed(context, '/home');
             },
             icon: const Icon(Icons.home),
           ),
@@ -145,7 +142,8 @@ class _DetailPageState extends State<DetailPage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 5.0, horizontal: 16.0),
               child: Text(
                 widget.news.title,
                 style: const TextStyle(
@@ -154,7 +152,8 @@ class _DetailPageState extends State<DetailPage> {
             ),
             SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 0.0, horizontal: 16.0),
                 child: Text(
                   articleContent ?? 'Loading...',
                   style: const TextStyle(fontSize: 16.0),
