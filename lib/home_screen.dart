@@ -27,17 +27,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _getArticles() async {
     const url =
-        'https://newsapi.org/v2/everything?domains=wsj.com&apiKey=393e2281d6b44ccda1a66b5f8a7e11b2';
+        'https://newsapi.org/v2/top-headlines?sources=techcrunch&apiKey=393e2281d6b44ccda1a66b5f8a7e11b2';
     final res = await http.get(Uri.parse(url));
     final body = json.decode(res.body) as Map<String, dynamic>;
 
     final articles = (body['articles'] as List).map((article) {
       return Article(
-        title: article['title'],
-        urlToImage: article['urlToImage'] ??
-            'https://via.placeholder.com/1200%20x%20627/',
-        content: article['content'] ?? 'Không có dữ liệu',
-      );
+          title: article['title'],
+          urlToImage: article['urlToImage'] ??
+              'https://via.placeholder.com/1200%20x%20627/',
+          content: article['content'] ?? 'Không có dữ liệu',
+          url: article['url']);
     }).toList();
 
     setState(() {

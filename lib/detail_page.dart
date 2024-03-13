@@ -2,6 +2,9 @@ import 'package:async_flutter/article_model.dart'; // Assuming Article model imp
 import 'package:flutter/material.dart';
 import 'package:localstore/localstore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+// ignore: library_prefixes
+import 'package:html/parser.dart' as htmlParser;
 
 import 'saved_articles_screen.dart';
 
@@ -16,12 +19,15 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage> {
   bool isLiked = false;
+  String? articleContent;
+  // ignore: prefer_final_fields
   List<Article> _savedArticles = []; // Danh sách các bài viết đã thích
 
   @override
   void initState() {
     super.initState();
     _loadLikedStatus();
+    _loadArticleContent();
   }
 
   Future<void> _loadLikedStatus() async {
@@ -48,6 +54,7 @@ class _DetailPageState extends State<DetailPage> {
       content: Text(
           updatedIsLiked ? 'Bài viết đã được lưu' : 'Bài viết đã được xóa'),
     );
+    // ignore: use_build_context_synchronously
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
     // Cập nhật danh sách bài viết đã lưu
@@ -67,6 +74,40 @@ class _DetailPageState extends State<DetailPage> {
     } else {
       await deleteArticle(widget.news);
     }
+  }
+
+  Future<void> _loadArticleContent() async {
+    try {
+      final content = await fetchArticleContent(widget.news.url);
+      setState(() {
+        articleContent = content ?? 'Không tìm thấy nội dung bài viết!';
+      });
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error loading article content: $e');
+      setState(() {
+        articleContent = 'Lỗi khi tải nội dung bài viết!';
+      });
+    }
+  }
+
+  Future<String?> fetchArticleContent(String url) async {
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final document = htmlParser.parse(response.body);
+        // Tìm phần tử chứa nội dung bài viết
+        final element = document.querySelector(
+            '.article-content'); // Thay ".article-content" bằng class hoặc id của phần tử chứa nội dung bài viết trên trang web thực tế
+        if (element != null) {
+          return element.text; // Trả về nội dung văn bản của phần tử
+        }
+      }
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error fetching article: $e');
+    }
+    return null;
   }
 
   @override
@@ -100,7 +141,7 @@ class _DetailPageState extends State<DetailPage> {
               child: Image.network(
                 widget.news.urlToImage,
                 width: double.infinity,
-                height: 190.0,
+                height: 200.0,
               ),
             ),
             Padding(
@@ -111,13 +152,15 @@ class _DetailPageState extends State<DetailPage> {
                     fontSize: 16.0, fontWeight: FontWeight.bold),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                widget.news.content,
-                style: const TextStyle(fontSize: 16.0),
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  articleContent ?? 'Loading...',
+                  style: const TextStyle(fontSize: 16.0),
+                ),
               ),
-            )
+            ),
           ],
         ),
       ),
