@@ -9,6 +9,7 @@ class SavedArticlesScreen extends StatefulWidget {
       : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _SavedArticlesScreenState createState() => _SavedArticlesScreenState();
 }
 
@@ -28,6 +29,7 @@ class _SavedArticlesScreenState extends State<SavedArticlesScreen> {
 
     if (likedArticles != null) {
       final Map<String, dynamic>? savedArticles =
+          // ignore: unnecessary_cast
           likedArticles as Map<String, dynamic>?;
 
       if (savedArticles != null) {
